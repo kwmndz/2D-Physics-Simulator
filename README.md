@@ -3,13 +3,13 @@
 ### In progress
 
 
-#### IMMEDIATE TODO:
+##### IMMEDIATE TODO:
 
 * Clean up code and create seperate files for classes
 * Create a parent class for objects effected by Verlet's Integration
 * Fix "ball" getting stuck when bouncing in a circular restriction
 
-#### FUTURE TODO:
+##### FUTURE TODO:
 * A LOT.
 * Implement threading
 
