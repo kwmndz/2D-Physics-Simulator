@@ -3,7 +3,7 @@
 #include <memory>
 #include <iostream>
 #include <cmath>
-#include "CollisionShapes.hpp"
+#include "../include/CollisionShapes.hpp"
 // g++ test.cpp -o test.o -lsfml-graphics -lsfml-window -lsfml-system
 
 class Window : public sf::RenderWindow
@@ -33,11 +33,11 @@ class Window : public sf::RenderWindow
 
                 if (distance > radius-shape->getRadius())
                 {
-                    std::cout << "Position0: " << shape->position_current.x << ", " << shape->position_current.y << std::endl;
+                    //std::cout << "Position0: " << shape->position_current.x << ", " << shape->position_current.y << std::endl;
                     direction = direction / distance;
                     shape->setPositionCurrent(center + direction * (radius-shape->getRadius()) * .999f);
 
-                    std::cout << "Position1: " << shape->position_current.x << ", " << shape->position_current.y << std::endl;
+                    //std::cout << "Position1: " << shape->position_current.x << ", " << shape->position_current.y << std::endl;
                     
                     // TODO: fix bounce
                     /*
@@ -59,7 +59,7 @@ class Window : public sf::RenderWindow
 
                     shape->position_old = shape->position_current - v_reflected;
 
-                    std::cout << "Position2: " << shape->position_old.x << ", " << shape->position_old.y << std::endl;
+                    //std::cout << "Position2: " << shape->position_old.x << ", " << shape->position_old.y << std::endl;
                     
                 }
             }

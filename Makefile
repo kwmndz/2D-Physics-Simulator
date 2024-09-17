@@ -8,7 +8,7 @@ SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-system
 
 # Define the target output and the source file
 TARGET = sw.o
-SRC = SimulationWrapper.cpp CollisionShapes.cpp
+SRC = ./src/SimulationWrapper.cpp ./src/classes/CollisionShapes.cpp
 
 # Default target to build the program
 all: $(TARGET)

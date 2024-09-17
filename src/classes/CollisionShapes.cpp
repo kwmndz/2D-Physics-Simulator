@@ -5,7 +5,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include "CollisionShapes.hpp"
+#include "../../include/CollisionShapes.hpp"
 
 /*
                             * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
