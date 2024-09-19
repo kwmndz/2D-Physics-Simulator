@@ -4,273 +4,8 @@
 #include <iostream>
 #include <cmath>
 #include "../include/CollisionShapes.hpp"
-// g++ test.cpp -o test.o -lsfml-graphics -lsfml-window -lsfml-system
-
-class Window : public sf::RenderWindow
-{
-    private:
-        void applyGravity()
-        {
-            for (int i = 0; i < static_cast<int>(nonStaticObjects.size()); i++)
-            {
-                auto shape = std::dynamic_pointer_cast<Ball>(nonStaticObjects[i]);
-                shape->accelerate(gravity);
-            }
-        }
-        void applyCircularConstraint()
-        {
-            const sf::Vector2f center = sf::Vector2f(this->getSize().x / 2.0f, this->getSize().y / 2.0f);
-            const float radius = this->getSize().y/2.0f;
-            // All calculations are about the center of the object
-            for (int i = 0; i < static_cast<int>(nonStaticObjects.size()); i++)
-            {
-                auto shape = std::dynamic_pointer_cast<Ball>(nonStaticObjects[i]);
-                sf::Vector2f position = shape->getPosition();
-                sf::Vector2f direction = position - center;
-
-                // Distance from center
-                float distance = sqrt(direction.x * direction.x + direction.y * direction.y);
-
-                if (distance > radius-shape->getRadius())
-                {
-                    //std::cout << "Position0: " << shape->position_current.x << ", " << shape->position_current.y << std::endl;
-                    direction = direction / distance;
-                    shape->setPositionCurrent(center + direction * (radius-shape->getRadius()) * .999f);
-
-                    //std::cout << "Position1: " << shape->position_current.x << ", " << shape->position_current.y << std::endl;
-                    
-                    // TODO: fix bounce
-                    /*
-                    Position0: 500, 529.911
-                    Position1: 499.714, 529.253
-                    Position2: 510.061, 537.783
-                    Position0: 168.604, 400.191
-                    Position1: 170.582, 399.335
-                    Position2: 166.022, 405.6
-                    Position0: 457.904, 554.019
-                    Position1: 455.562, 543.747
-                    Position2: 453.811, 545.17
-                    */
-                    // Bounce
-                    sf::Vector2f v = shape->position_current - shape->position_old;
-                    sf::Vector2f v_normal = direction * (v.x * direction.x + v.y * direction.y);
-                    sf::Vector2f v_tangent = v - v_normal;
-                    sf::Vector2f v_reflected = v_tangent - v_normal * 0.9f; 
-
-                    shape->position_old = shape->position_current - v_reflected;
-
-                    //std::cout << "Position2: " << shape->position_old.x << ", " << shape->position_old.y << std::endl;
-                    
-                }
-            }
-        }
-    public:
-        sf::Vector2f gravity = sf::Vector2f(0, 981.0f);
-        std::vector<std::shared_ptr<sf::Shape>> shapes;
-        std::vector<std::shared_ptr<sf::Shape>> nonStaticObjects;
-        std::vector<std::shared_ptr<sf::Text>> TextInputFields;
-        std::vector<bool> isTextInputFieldCentered;
-        std::vector<std::shared_ptr<sf::Shape>> boundingBoxes;
-        std::vector<bool> isTextInputActive;
-        bool isFocused = false;
-
-        // Contructor that inherets from sf::RenderWindow
-        Window(sf::VideoMode mode, const sf::String &title, sf::Uint32 style = sf::Style::Default, const int frameRate = 60,
-                const sf::ContextSettings &settings = sf::ContextSettings(), const float posRatioX = 0.5, const float posRatioY = 0.5, bool resizable = true)
-            : sf::RenderWindow(mode, title, style, settings)
-        {
-            // Get the desktop resolution
-            sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
-            // Get the window position
-            sf::Vector2i windowPos;
-            windowPos.x = desktop.width * posRatioX;
-            windowPos.y = desktop.height * posRatioY;
-            // Set the window position
-            this->setPosition(windowPos);
-
-            // Set the framerate limit
-            this->setFramerateLimit(frameRate);
-
-            // Set the window to be active
-            this->setActive(true);
-
-            // Set the window to be focused
-            this->requestFocus();
-
-            // Set the window to be on top
-            this->setVerticalSyncEnabled(true);
-
-            // Set the window to be resizable
-            this->setVerticalSyncEnabled(resizable);
-
-            // Test constraint
-            if (this->getSize().x > this->getSize().y)
-            {
-                const sf::Vector2f center = sf::Vector2f(this->getSize().x / 2.0f, this->getSize().y / 2.0f);
-                const float radius = this->getSize().y/2.0f;
-                sf::CircleShape circularArea(radius);
-                circularArea.setFillColor(sf::Color::White); // Transparent fill
-                circularArea.setOutlineColor(sf::Color::Yellow); // Outline color
-                circularArea.setOutlineThickness(5.f); // Outline thickness
-                circularArea.setOrigin(radius, radius);
-                circularArea.setPosition(center);
-                shapes.push_back(std::make_shared<sf::CircleShape>(circularArea));
-            }
-        }
-
-        
-        void draw(const sf::Drawable &drawable, const sf::RenderStates &states = sf::RenderStates::Default)
-        {
-            sf::RenderWindow::draw(drawable, states);
-        }
-        
-        void update()
-        {       
-            this->clear();
-            for (int i = 0; i < static_cast<int>(shapes.size()); i++)
-            {
-                this->draw(*shapes[i]);
-            }
-            for (int i = 0; i < static_cast<int>(nonStaticObjects.size()); i++)
-            {
-                this->draw(*nonStaticObjects[i]);
-            }
-            for (int i = 0; i < static_cast<int>(TextInputFields.size()); i++)
-            {
-                if (isTextInputFieldCentered[i])
-                {
-                    float x_centered = boundingBoxes[i]->getPosition().x + boundingBoxes[i]->getGlobalBounds().width/2 - TextInputFields[i]->getGlobalBounds().width/2;
-                    float y_centered = boundingBoxes[i]->getPosition().y;
-                    TextInputFields[i]->setPosition(x_centered,y_centered);
-                }
-                this->draw(*boundingBoxes[i]);
-                this->draw(*TextInputFields[i]);
-            }
-            this->display();
-        }
-
-        void updatePosNONStatic(float dt)
-        {
-            applyGravity();
-            applyCircularConstraint();
-            for (int i = 0; i < static_cast<int>(nonStaticObjects.size()); i++)
-            {
-                auto shape = std::dynamic_pointer_cast<Ball>(nonStaticObjects[i]);
-                shape->updatePos(dt);
-                //std::cout << "Position: " << shape->getPosition().x << ", " << shape->getPosition().y << std::endl;
-            }
-        }
-
-        void addShape(std::shared_ptr<sf::Shape> shape)
-        {
-            shapes.push_back(shape);
-        }
-
-        void addNonStaticObject(std::shared_ptr<sf::Shape> shape)
-        {
-            nonStaticObjects.push_back(shape);
-        }
-
-        void addTextInputField(std::shared_ptr<sf::Text> text, float width = 100, float height = 4, bool centered = false)
-        {
-            // Create a bounding box for the text
-            sf::FloatRect textBounds = text->getGlobalBounds();
-            auto boundingBox = std::make_shared<sf::RectangleShape>(sf::Vector2f(textBounds.width+width, textBounds.height+height));
-            boundingBox->setPosition(textBounds.left-1, textBounds.top+height/2);
-            boundingBox->setFillColor(sf::Color::Transparent);
-            boundingBox->setOutlineColor(sf::Color::White);
-            boundingBox->setOutlineThickness(1.f);
-
-            if (centered)
-            {
-                text->setPosition(boundingBox->getPosition().x + boundingBox->getGlobalBounds().width/2 - text->getGlobalBounds().width/2, boundingBox->getPosition().y);
-            }
-
-            // Add the bounding box and text to the window
-            boundingBoxes.push_back(boundingBox);
-            TextInputFields.push_back(text);
-            isTextInputFieldCentered.push_back(centered);
-            isTextInputActive.push_back(false);
-        }
-
-        void removeDrawable(std::shared_ptr<sf::Shape> shape)
-        {
-            for (int i = 0; i < static_cast<int>(shapes.size()); i++)
-            {
-                if (shapes[i] == shape)
-                {
-                    shapes.erase(shapes.begin() + i);
-                    break;
-                }
-            }
-        }
-
-        void removeTextInputField(std::shared_ptr<sf::Text> text)
-        {
-            for (int i = 0; i < static_cast<int>(TextInputFields.size()); i++)
-            {
-                if (TextInputFields[i] == text)
-                {
-                    TextInputFields.erase(TextInputFields.begin() + i);
-                    boundingBoxes.erase(boundingBoxes.begin() + i);
-                    isTextInputFieldCentered.erase(isTextInputFieldCentered.begin() + i);
-                    isTextInputActive.erase(isTextInputActive.begin() + i);
-                    break;
-                }
-            }
-        }
-
-        std::vector<std::shared_ptr<sf::Shape>> getShapes()
-        {
-            return shapes;
-        }
-
-        std::vector<std::shared_ptr<sf::Text>> getTextInputFields()
-        {
-            return TextInputFields;
-        }
-
-        std::vector<std::shared_ptr<sf::Shape>> getBoundingBoxes()
-        {
-            return boundingBoxes;
-        }
-
-        void checkInputTextSelected(sf::Vector2f mousePos)
-        {
-            for (int i = 0; i < static_cast<int>(boundingBoxes.size()); i++)
-            {
-                if (boundingBoxes[i]->getGlobalBounds().contains(mousePos))
-                {
-                    isTextInputActive[i] = true;
-                }
-                else
-                {
-                    isTextInputActive[i] = false;
-                }
-            }
-        }
-
-        void setAllTextInputFieldsInactive()
-        {
-            for (int i = 0; i < static_cast<int>(isTextInputActive.size()); i++)
-            {
-                isTextInputActive[i] = false;
-            }
-        }
-
-        std::shared_ptr<sf::Text> getActiveTextInputField()
-        {
-            for (int i = 0; i < static_cast<int>(isTextInputActive.size()); i++)
-            {
-                if (isTextInputActive[i])
-                {
-                    return TextInputFields[i];
-                }
-            }
-            return nullptr;
-        }
-
-};
+#include "../include/ConfigurationWindow.hpp"
+#include "../include/SimulationWindow.hpp"
 
 int main()
 {
@@ -278,30 +13,30 @@ int main()
     const float TIME_SUB_STEPS = 8.0f;
     const float GRAVITY = 9.81f;
 
-    Window window1(sf::VideoMode(800, 600), "Physics Simulator", sf::Style::Close, 60, sf::ContextSettings(), 0.1, 0.25, true);
-    Window window2(sf::VideoMode(300, 600), "Configuration", sf::Style::Close, 60, sf::ContextSettings(), 0.6, 0.25, true);
+    // Constraint:
+    sf::CircleShape constraingCircle(300.f);
+    constraingCircle.setFillColor(sf::Color::White);
+    constraingCircle.setOrigin(300.f, 300.f);
+    constraingCircle.setPosition(sf::Vector2f(400, 300));
 
-    // Window 1 add shapes
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
-    shape.setOrigin(shape.getRadius(), shape.getRadius());
-    shape.setPosition(shape.getRadius()+10, shape.getRadius()+10);
-    window1.addShape(std::make_shared<sf::CircleShape>(shape));
-    sf::Vector2f velocity = sf::Vector2f(0.0f, 0.0f);
-    int mass = 25;
+    std::shared_ptr<sf::Shape> constraint = std::make_shared<sf::CircleShape>(constraingCircle);
 
-    sf::RectangleShape rectangle(sf::Vector2f(120, 5));
-    rectangle.setFillColor(sf::Color::Red);
-    rectangle.setPosition(10, 10);
-    window1.addShape(std::make_shared<sf::RectangleShape>(rectangle));
+    windowSimulation simWin1(sf::VideoMode(800, 600), "Physics Simulator", sf::Style::Close, sf::ContextSettings(), 0.1, 0.25, true, true, 60, constraint, sf::Color::Black);
+    windowConfig configWin1(sf::VideoMode(300, 600), "Configuration", sf::Style::Close, sf::ContextSettings(), 0.6, 0.25, true, false, 60, sf::Color::Black);
 
+    // Sim Window config:
+    /*
     Ball ball(50.f, 30, sf::Vector2f(500, 95), 1, sf::Color::Blue, sf::Color::White);
-    window1.addNonStaticObject(std::make_shared<Ball>(ball));
+    Ball ball2(50.f, 30, sf::Vector2f(150, 300), 1, sf::Color::Red, sf::Color::White);
+    Ball ball3(50.f, 30, sf::Vector2f(200, 50), 1, sf::Color::Green, sf::Color::White);
+    simWin1.add_non_static_object(std::make_shared<Ball>(ball));
+    simWin1.add_non_static_object(std::make_shared<Ball>(ball2));
+    simWin1.add_non_static_object(std::make_shared<Ball>(ball3));
+    */
 
-
-    // Window 2 add Text Input Fields
+    // Config Window config:
     std::string font_path = "./arial.ttf";
-    sf::String playerInput = "000";
+    sf::String playerInput = "0";
     sf::Font font;
     if (!font.loadFromFile(font_path)) {
         std::cerr << "Error loading font\n";
@@ -313,100 +48,95 @@ int main()
     playerText.setCharacterSize(24);
     playerText.setFillColor(sf::Color::Red);
     playerText.setPosition(100-playerText.getGlobalBounds().width/2,5);
+    configWin1.add_text_input_field(std::make_shared<sf::Text>(playerText), 100, 8, true);
 
-    window2.addTextInputField(std::make_shared<sf::Text>(playerText), 100, 8, true);
-
-    window1.isFocused = false;
-    window2.isFocused = true;
+    // Main loop
 
     sf::Clock clock;
     float accumulator = 0.f;
+    float acc2 = 0.f;
 
-    while (window1.isOpen() || window2.isOpen())
+    simWin1.update_visuals();
+    configWin1.update_visuals();
+
+    sf::sleep(sf::seconds(1));
+
+
+    const float radius = 10.f;
+    const int numColors = 10;
+    std::vector<sf::Color> colors = {
+        sf::Color::Red, sf::Color::Green, sf::Color::Blue, sf::Color::Yellow, sf::Color::Magenta,
+        sf::Color::Cyan, sf::Color(255, 165, 0), sf::Color::Black, sf::Color(255, 165, 0), sf::Color(128, 0, 128)
+    };
+    int count = 0;
+
+    while (simWin1.isOpen() || configWin1.isOpen()) 
     {
         sf::Event event;
-        while (window1.pollEvent(event))
-        {
-            if (event.type == sf::Event::GainedFocus) 
-            {
-                window1.isFocused = true;
+        while (simWin1.pollEvent(event)) {
+            if (event.type == sf::Event::GainedFocus) {
+                simWin1.isFocused = true;
                 break;
             }
 
-            if (!window1.isFocused)
-            {
+            if (!simWin1.isFocused) {
                 break;
             }
 
-            if (event.type == sf::Event::LostFocus) 
-            {
-                window1.isFocused = false;
+            if (event.type == sf::Event::LostFocus) {
+                simWin1.isFocused = false;
             }
-            if (event.type == sf::Event::Closed || event.key.code == sf::Keyboard::Escape)
-            {
-                window1.close();
+            if (event.type == sf::Event::Closed || event.key.code == sf::Keyboard::Escape) {
+                simWin1.close();
                 break;
             }
 
         }
-        while (window2.pollEvent(event))
-        {
+        while (configWin1.pollEvent(event)) {
 
-            if (event.type == sf::Event::GainedFocus) 
-            {
-                window2.isFocused = true;
+            if (event.type == sf::Event::GainedFocus) {
+                configWin1.isFocused = true;
                 break;
             }
 
-            if (!window2.isFocused)
-            {
+            if (!configWin1.isFocused) {
                 break;
             }
 
-            if (event.type == sf::Event::LostFocus) 
-            {
-                window2.isFocused = false;
+            if (event.type == sf::Event::LostFocus) {
+                configWin1.isFocused = false;
             }
-            if (event.type == sf::Event::Closed || event.key.code == sf::Keyboard::Escape)
-            {
-                window2.close();
+            if (event.type == sf::Event::Closed || event.key.code == sf::Keyboard::Escape) {
+                configWin1.close();
                 break;
             }
 
-            if (event.type == sf::Event::MouseButtonReleased)
-            {
-                if (event.mouseButton.button == sf::Mouse::Left)
-                {
-                    sf::Vector2f mousePos = window2.mapPixelToCoords(sf::Mouse::getPosition(window2));
-                    window2.checkInputTextSelected(mousePos);
+            if (event.type == sf::Event::MouseButtonReleased) {
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    sf::Vector2f mousePos = configWin1.mapPixelToCoords(sf::Mouse::getPosition(configWin1));
+                    configWin1.check_input_text_selected(mousePos);
                 }
             }
 
-            if (event.type == sf::Event::TextEntered)
-            {
+            if (event.type == sf::Event::TextEntered) {
 
-                if (std::find(ACCEPTABLE_UNICODE.begin(), ACCEPTABLE_UNICODE.end(), event.text.unicode) != ACCEPTABLE_UNICODE.end())
-                {
-                    auto activeTextInputField = window2.getActiveTextInputField();
-                    if (activeTextInputField == nullptr)
-                    {
+                if (std::find(ACCEPTABLE_UNICODE.begin(), ACCEPTABLE_UNICODE.end(), event.text.unicode) != ACCEPTABLE_UNICODE.end()) {
+                    auto activeTextInputField = configWin1.get_active_text_input_field();
+                    if (activeTextInputField == nullptr) {
                         continue;
                     }
 
                     playerInput = activeTextInputField->getString();
 
 
-                    if (event.text.unicode == 8 && !playerInput.isEmpty()) // 8 is the ASCII code for backspace
-                    {
+                    if (event.text.unicode == 8 && !playerInput.isEmpty()) { // 8 is the ASCII code for backspace
                         playerInput.erase(playerInput.getSize() - 1, 1);
 
-                        if (playerInput.isEmpty())
-                        {
+                        if (playerInput.isEmpty()) {
                             playerInput = "0";
                         }
                     }
-                    else if (event.text.unicode != 8)
-                    {
+                    else if (event.text.unicode != 8) {
                         if (playerInput.getSize() == 1 && playerInput[0] == '0' && event.text.unicode != '0' && event.text.unicode != '.') {
                             playerInput.erase(0, 1);
                         }
@@ -434,47 +164,73 @@ int main()
                         playerInputValue = 1;
                     }
                     
-                    if (playerInputValue != 0)
-                    {
+                    if (playerInputValue != 0) {
                         
-                        // get the old radius and position of the circle
-                        float oldRadius = std::dynamic_pointer_cast<sf::CircleShape>(window1.getShapes()[0])->getRadius();
-                        sf::Vector2f oldPosition = std::dynamic_pointer_cast<sf::CircleShape>(window1.getShapes()[0])->getPosition();
-                        sf::Vector2f oldCenter = oldPosition + sf::Vector2f(oldRadius, oldRadius);
-
-                        // Change position so the center point stays the same when radius changes
-                        sf::Vector2f newPosition = oldCenter - sf::Vector2f(playerInputValue, playerInputValue);
-                        
-
-                        // Dynamic cast the shape to a circle and change the radius
-                        std::dynamic_pointer_cast<sf::CircleShape>(window1.getShapes()[0])->setPosition(newPosition);
-                        std::dynamic_pointer_cast<sf::CircleShape>(window1.getShapes()[0])->setRadius(playerInputValue);
+                        // TODO: Attach inputs to certain objects/constants
+                        continue;
                     }
                 }
             }
 
-            if (event.type == sf::Event::KeyPressed)
-            {
-                if (event.key.code == sf::Keyboard::Return)
-                {
-                    window2.setAllTextInputFieldsInactive();
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Return) {
+                    configWin1.set_all_text_input_fields_inactive();
                 }
             }
             
         }
 
-        float dt = clock.restart().asSeconds();
+        float dt = 0.016;//clock.restart().asSeconds();
         accumulator += dt;
+        acc2 += dt;
+        float sub_dt = 0;
 
-        while (accumulator >= 1.f / 60.0f)
-        {
-            window1.updatePosNONStatic(1.f / 60.0f);
+        /*
+        while (accumulator >= 1.f / 60.0f) {
+            sub_dt = 1.f / 60.0f / TIME_SUB_STEPS;
+            for (int i = 0; i < 8; i++) {
+                simWin1.update_positions(sub_dt);
+            }
             accumulator -= 1.f / 60.0f;
         }
+        */
+        
+        sub_dt = dt/ TIME_SUB_STEPS;
+        for (int i = 0; i < 8; i++) {
+            simWin1.update_positions(sub_dt);
+        }
+
+        if (acc2 >= 0.1 and count < 3) {
+            float xPos = 400 + 48 * std::cos(count * M_PI / 2); // Oscillate between 476 and 524
+
+            Ball tinyBall(radius, 30, sf::Vector2f(xPos, 80), 1, colors[count%10], sf::Color::White);
+            simWin1.add_non_static_object(std::make_shared<Ball>(tinyBall));
+            acc2 = 0;
+            count++;
+        }
+
+        // Check for mouse hover over balls
+        sf::Vector2i mousePos = sf::Mouse::getPosition(simWin1);
+        for (const auto& ball : simWin1.nonStaticObjects) {
+            if (ball->getGlobalBounds().contains(simWin1.mapPixelToCoords(mousePos))) {
+            auto it = std::find(simWin1.nonStaticObjects.begin(), simWin1.nonStaticObjects.end(), ball);
+            if (it != simWin1.nonStaticObjects.end()) {
+                int index = std::distance(simWin1.nonStaticObjects.begin(), it);
+                std::cout << "Ball index: " << index << std::endl;
+            }
+            break;
+            }
+        }
+        
+        /*
+        while (accumulator >= 1.f / 60.0f) {
+            simWin1.update_positions(1.f / 60.0f);
+            accumulator -= 1.f / 60.0f;
+        }*/
         
 
-        window1.update();
-        window2.update();
+        simWin1.update_visuals();
+        configWin1.update_visuals();
     }
 
     return 0;

@@ -4,14 +4,15 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "sw.o",
+            "program": "${workspaceFolder}/sw.o",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -28,7 +29,12 @@
                 }
             ]
         }
-
+    ],
+    "environment": [
+        {
+            "name": "ASAN_OPTIONS",
+            "value": "abort_on_error=1:detect_leaks=0"
+        }
     ]
 
 }

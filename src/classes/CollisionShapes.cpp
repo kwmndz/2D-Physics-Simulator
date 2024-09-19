@@ -40,7 +40,6 @@ Ball::Ball(float radius=1, std::size_t pointCount = 30, sf::Vector2f position = 
 Ball::~Ball()
 {
     // Destructor
-    delete this;
 }
 
 void Ball::updatePos(float dt)
