@@ -50,8 +50,8 @@ void Ball::updatePos(float dt)
     this->position_old = this->position_current; // Store the current position
 
     // Update the position
-    this->position_current = this->position_current + velocity + this->acceleration * dt * dt;
-    this->setPosition(this->position_current);
+    this->position_current = this->position_current + velocity + this->acceleration * dt * dt; //.0025  .0525
+    this->setPosition(this->position_current); //.0025
 
     // Reset acceleration
     this->acceleration = sf::Vector2f(0, 0);

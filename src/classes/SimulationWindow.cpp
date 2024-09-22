@@ -3,6 +3,7 @@
 #include <cmath>
 #include "../../include/SimulationWindow.hpp"
 #include "../../include/CollisionShapes.hpp"
+#include <iostream>
 
 /////////PRIVATE_FUNCTIONS/////////
 void windowSimulation::applyGravity()
@@ -27,21 +28,26 @@ void windowSimulation::applyCircularConstraint()
         float distance = sqrt(direction.x * direction.x + direction.y * direction.y);
 
         if (distance > radius - shape->getRadius()) {
-            // std::cout << "Position0: " << shape->position_current.x << ", " << shape->position_current.y << std::endl;
-            direction = direction / distance;
-            shape->setPositionCurrent(center + direction * (radius - shape->getRadius()) * 1.f);
+            //std::cout << "Position-1:" << shape->position_old.x << ", " << shape->position_old.y << std::endl;
+            //std::cout << "Position0: " << shape->position_current.x << ", " << shape->position_current.y << std::endl;
 
-            // std::cout << "Position1: " << shape->position_current.x << ", " << shape->position_current.y << std::endl;
+            sf::Vector2f v = shape->position_current - shape->position_old;
+
+            sf::Vector2f n = direction / distance;
+            shape->setPositionCurrent(center + n * (radius - shape->getRadius()) * 1.f);
+
+            //std::cout << "Position1: " << shape->position_current.x << ", " << shape->position_current.y << std::endl;
 
             // Bounce
-            sf::Vector2f v = shape->position_current - shape->position_old;
-            sf::Vector2f v_normal = direction * (v.x * direction.x + v.y * direction.y);
+
+            //////////////////TODO: FIX BOUNCE - when energy is "conserved"//////////////////////
+            sf::Vector2f v_normal = n * (v.x * n.x + v.y * n.y);
             sf::Vector2f v_tangent = v - v_normal;
-            sf::Vector2f v_reflected = v_tangent - v_normal * 1.f;
+            sf::Vector2f v_reflected = (v_tangent - v_normal) * .99f;
 
             shape->position_old = shape->position_current - v_reflected;
 
-            // std::cout << "Position2: " << shape->position_old.x << ", " << shape->position_old.y << std::endl;*/
+            //std::cout << "Position2: " << shape->position_old.x << ", " << shape->position_old.y << std::endl;
         }
     }
 }
@@ -110,7 +116,7 @@ windowSimulation::windowSimulation(const sf::VideoMode &videoMode, const sf::Str
         this->requestFocus();
     this->isFocused = isFocused;
 
-    this->setVerticalSyncEnabled(resizable);
+    //this->setVerticalSyncEnabled(resizable);
 
     // Constraint for the objects
     if (constraint != nullptr) {

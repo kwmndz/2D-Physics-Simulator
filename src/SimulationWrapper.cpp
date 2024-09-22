@@ -15,6 +15,7 @@ int main()
 
     // Constraint:
     sf::CircleShape constraingCircle(300.f);
+    constraingCircle.setPointCount(100);
     constraingCircle.setFillColor(sf::Color::White);
     constraingCircle.setOrigin(300.f, 300.f);
     constraingCircle.setPosition(sf::Vector2f(400, 300));
@@ -180,6 +181,34 @@ int main()
             
         }
 
+        if (acc2 >= 0.1 and count < 400) {
+            float staticObjectWidth = 5.f;
+            //sf::RectangleShape staticObject(sf::Vector2f(staticObjectWidth, staticObjectWidth));
+            //staticObject.setFillColor(sf::Color::Blue);
+            //staticObject.setPosition(400, 75); // 5 units above the ball
+            //simWin1.add_shape(std::make_shared<sf::RectangleShape>(staticObject));
+
+            float xPos = 380 + 100 * std::cos((count) * M_PI / 2); 
+            //xPos = 400.f;
+            Ball tinyBall(radius, 30, sf::Vector2f(xPos, 80), 1, colors[count%10], sf::Color::White);
+            simWin1.add_non_static_object(std::make_shared<Ball>(tinyBall));
+            acc2 = 0;
+            count++;
+        }
+
+        // Check for mouse hover over balls
+        sf::Vector2i mousePos = sf::Mouse::getPosition(simWin1);
+        for (const auto& ball : simWin1.nonStaticObjects) {
+            if (ball->getGlobalBounds().contains(simWin1.mapPixelToCoords(mousePos))) {
+            auto it = std::find(simWin1.nonStaticObjects.begin(), simWin1.nonStaticObjects.end(), ball);
+            if (it != simWin1.nonStaticObjects.end()) {
+                int index = std::distance(simWin1.nonStaticObjects.begin(), it);
+                std::cout << "Ball index: " << index << std::endl;
+            }
+            break;
+            }
+        }
+
         float dt = 0.016;//clock.restart().asSeconds();
         accumulator += dt;
         acc2 += dt;
@@ -198,28 +227,6 @@ int main()
         sub_dt = dt/ TIME_SUB_STEPS;
         for (int i = 0; i < 8; i++) {
             simWin1.update_positions(sub_dt);
-        }
-
-        if (acc2 >= 0.1 and count < 3) {
-            float xPos = 400 + 48 * std::cos(count * M_PI / 2); // Oscillate between 476 and 524
-
-            Ball tinyBall(radius, 30, sf::Vector2f(xPos, 80), 1, colors[count%10], sf::Color::White);
-            simWin1.add_non_static_object(std::make_shared<Ball>(tinyBall));
-            acc2 = 0;
-            count++;
-        }
-
-        // Check for mouse hover over balls
-        sf::Vector2i mousePos = sf::Mouse::getPosition(simWin1);
-        for (const auto& ball : simWin1.nonStaticObjects) {
-            if (ball->getGlobalBounds().contains(simWin1.mapPixelToCoords(mousePos))) {
-            auto it = std::find(simWin1.nonStaticObjects.begin(), simWin1.nonStaticObjects.end(), ball);
-            if (it != simWin1.nonStaticObjects.end()) {
-                int index = std::distance(simWin1.nonStaticObjects.begin(), it);
-                std::cout << "Ball index: " << index << std::endl;
-            }
-            break;
-            }
         }
         
         /*

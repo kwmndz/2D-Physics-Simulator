@@ -17,7 +17,7 @@ windowConfig::windowConfig(const sf::VideoMode &videoMode, const sf::String &tit
         this->requestFocus();
     this->isFocused = isFocused;
 
-    this->setVerticalSyncEnabled(resizable);
+    //this->setVerticalSyncEnabled(resizable);
 
     // Set the window position
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
