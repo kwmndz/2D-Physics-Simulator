@@ -44,21 +44,19 @@ void windowConfig::draw(const sf::Drawable &drawable, const sf::RenderStates &st
 void windowConfig::update_visuals()
 {
     this->clear(backgroundColor);
-    for (int i = 0; i < static_cast<int>(textInputFields.size()); i++) {
-        if (textInputConfig[i][1]) {
-            if (textInputConfig[i][0]) {
-                float x_centered = textBoundingBoxes[i]->getPosition().x + textBoundingBoxes[i]->getGlobalBounds().width/2 - textInputFields[i]->getGlobalBounds().width/2;
-                float y_centered = textBoundingBoxes[i]->getPosition().y;
-                textInputFields[i]->setPosition(x_centered,y_centered);
-            }
-            this->draw(*textBoundingBoxes[i]);
-            this->draw(*textInputFields[i]);
+    for (int i = 0; i < static_cast<int>(textInputFields.size()); i++) {  
+        if (textInputConfig[i][0]) {
+            float x_centered = textBoundingBoxes[i]->getPosition().x + textBoundingBoxes[i]->getGlobalBounds().width/2 - textInputFields[i]->getGlobalBounds().width/2;
+            float y_centered = textBoundingBoxes[i]->getPosition().y;
+            textInputFields[i]->setPosition(x_centered,y_centered);
         }
+        this->draw(*textBoundingBoxes[i]);
+        this->draw(*textInputFields[i]);
     }
     this->display();
 }
 
-void windowConfig::add_text_input_field(std::shared_ptr<sf::Text> text, float width, float height, bool centered)
+void windowConfig::add_text_input_field(std::shared_ptr<sf::Text> text, float width, float height, bool centered, unsigned int attachedObject = -1)
 {
     // Create a bounding box for the text
     sf::FloatRect textBounds = text->getGlobalBounds();
@@ -71,6 +69,7 @@ void windowConfig::add_text_input_field(std::shared_ptr<sf::Text> text, float wi
     textInputFields.push_back(text);
     textBoundingBoxes.push_back(boundingBox);
     textInputConfig.push_back({centered, false});
+    textInputAttachedObjects.push_back(attachedObject);
 }
 
 void windowConfig::remove_text_input_field(std::shared_ptr<sf::Text> text)
@@ -94,7 +93,7 @@ void windowConfig::check_input_text_selected(sf::Vector2f mousePos)
         else {
             textInputConfig[i][1] = false;
         }
-    }
+    } 
 }
 
 void windowConfig::set_all_text_input_fields_inactive()
@@ -114,3 +113,12 @@ std::shared_ptr<sf::Text> windowConfig::get_active_text_input_field()
     return nullptr;
 }
 
+int windowConfig::get_active_attached_object_index() 
+{
+    for (int i = 0; i < static_cast<int>(textInputFields.size()); i++) {
+        if (textInputConfig[i][1]) {
+            return textInputAttachedObjects[i];
+        }
+    }
+    return -1;
+}

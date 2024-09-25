@@ -34,10 +34,11 @@ class windowSimulation : public sf::RenderWindow
         void draw(const sf::Drawable &drawable, const sf::RenderStates &states);
         void update_visuals();
         void update_positions(float dt);
-        void add_shape(std::shared_ptr<sf::Shape> shape);
+        unsigned int add_shape(std::shared_ptr<sf::Shape> shape);
         void add_non_static_object(std::shared_ptr<sf::Shape> shape);
         void remove_shape(std::shared_ptr<sf::Shape> shape);
         void remove_non_static_object(std::shared_ptr<sf::Shape> shape);
+        void apply_acceleration(sf::Vector2f force, int index);
 
 };
 

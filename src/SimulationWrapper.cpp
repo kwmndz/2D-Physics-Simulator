@@ -37,7 +37,7 @@ int main()
 
     // Config Window config:
     std::string font_path = "./arial.ttf";
-    sf::String playerInput = "0";
+    sf::String playerInput = "981.0";
     sf::Font font;
     if (!font.loadFromFile(font_path)) {
         std::cerr << "Error loading font\n";
@@ -49,7 +49,8 @@ int main()
     playerText.setCharacterSize(24);
     playerText.setFillColor(sf::Color::Red);
     playerText.setPosition(100-playerText.getGlobalBounds().width/2,5);
-    configWin1.add_text_input_field(std::make_shared<sf::Text>(playerText), 100, 8, true);
+    configWin1.add_text_input_field(std::make_shared<sf::Text>(playerText), 100, 8, true, 0);
+
 
     // Main loop
 
@@ -168,7 +169,11 @@ int main()
                     if (playerInputValue != 0) {
                         
                         // TODO: Attach inputs to certain objects/constants
-                        continue;
+                        //continue;
+                        int activeAttachedObjectIndex = configWin1.get_active_attached_object_index();
+                        if (activeAttachedObjectIndex == 0) {
+                            simWin1.gravity = sf::Vector2f(0, playerInputValue);
+                        }
                     }
                 }
             }
@@ -181,17 +186,14 @@ int main()
             
         }
 
-        if (acc2 >= 0.1 and count < 400) {
-            float staticObjectWidth = 5.f;
-            //sf::RectangleShape staticObject(sf::Vector2f(staticObjectWidth, staticObjectWidth));
-            //staticObject.setFillColor(sf::Color::Blue);
-            //staticObject.setPosition(400, 75); // 5 units above the ball
-            //simWin1.add_shape(std::make_shared<sf::RectangleShape>(staticObject));
-
-            float xPos = 380 + 100 * std::cos((count) * M_PI / 2); 
-            //xPos = 400.f;
-            Ball tinyBall(radius, 30, sf::Vector2f(xPos, 80), 1, colors[count%10], sf::Color::White);
+        if (acc2 >= 0.01 and count < 500) {
+            float angle = count * (M_PI / 4); // Rotate by 45 degrees for each ball
+            float xPos = 400 + 100 * std::cos(angle); 
+            //float yPos = 300 + 100 * std::sin(angle); 
+            Ball tinyBall(radius, 30, sf::Vector2f(xPos, 56), 1, colors[count % numColors], sf::Color::White);
+            //tinyBall.accelerate(sf::Vector2f(100 * std::cos(angle), 100 * std::sin(angle))); // Shoot out in rotating directions
             simWin1.add_non_static_object(std::make_shared<Ball>(tinyBall));
+            simWin1.apply_acceleration(sf::Vector2f(100000 * std::cos(angle), 100000 * 2), simWin1.nonStaticObjects.size() - 1);
             acc2 = 0;
             count++;
         }
@@ -200,12 +202,12 @@ int main()
         sf::Vector2i mousePos = sf::Mouse::getPosition(simWin1);
         for (const auto& ball : simWin1.nonStaticObjects) {
             if (ball->getGlobalBounds().contains(simWin1.mapPixelToCoords(mousePos))) {
-            auto it = std::find(simWin1.nonStaticObjects.begin(), simWin1.nonStaticObjects.end(), ball);
-            if (it != simWin1.nonStaticObjects.end()) {
-                int index = std::distance(simWin1.nonStaticObjects.begin(), it);
-                std::cout << "Ball index: " << index << std::endl;
-            }
-            break;
+                auto it = std::find(simWin1.nonStaticObjects.begin(), simWin1.nonStaticObjects.end(), ball);
+                if (it != simWin1.nonStaticObjects.end()) {
+                    int index = std::distance(simWin1.nonStaticObjects.begin(), it);
+                    std::cout << "Ball index: " << index << std::endl;
+                }
+                break;
             }
         }
 

@@ -47,7 +47,13 @@ void windowSimulation::applyCircularConstraint()
 
             shape->position_old = shape->position_current - v_reflected;
 
-            //std::cout << "Position2: " << shape->position_old.x << ", " << shape->position_old.y << std::endl;
+
+            /*
+            Position2: 400, 592.002
+            Position2: 400, 591.998
+            Position2: 400, 591.998
+            */
+            std::cout << "Position2: " << shape->position_old.x << ", " << shape->position_old.y << std::endl;
         }
     }
 }
@@ -176,9 +182,12 @@ void windowSimulation::update_positions(float dt)
     }
 }
 
-void windowSimulation::add_shape(std::shared_ptr<sf::Shape> shape)
+// Returns the index of the shape in the shapes vector, so you can attach it to a input object
+unsigned int windowSimulation::add_shape(std::shared_ptr<sf::Shape> shape)
 {
     shapes.push_back(shape);
+    return shapes.size() - 1;
+
 }
 
 void windowSimulation::add_non_static_object(std::shared_ptr<sf::Shape> shape)
@@ -204,5 +213,11 @@ void windowSimulation::remove_non_static_object(std::shared_ptr<sf::Shape> shape
             break;
         }
     }
+}
+
+void windowSimulation::apply_acceleration(sf::Vector2f acc, int index)
+{
+    auto shape = std::dynamic_pointer_cast<Ball>(nonStaticObjects[index]);
+    shape->accelerate(acc);
 }
 
