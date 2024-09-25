@@ -53,7 +53,7 @@ void windowSimulation::applyCircularConstraint()
             Position2: 400, 591.998
             Position2: 400, 591.998
             */
-            std::cout << "Position2: " << shape->position_old.x << ", " << shape->position_old.y << std::endl;
+            //std::cout << "Position2: " << shape->position_old.x << ", " << shape->position_old.y << std::endl;
         }
     }
 }

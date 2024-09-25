@@ -68,9 +68,12 @@ int main()
     const int numColors = 10;
     std::vector<sf::Color> colors = {
         sf::Color::Red, sf::Color::Green, sf::Color::Blue, sf::Color::Yellow, sf::Color::Magenta,
-        sf::Color::Cyan, sf::Color(255, 165, 0), sf::Color::Black, sf::Color(255, 165, 0), sf::Color(128, 0, 128)
+        sf::Color::Cyan, sf::Color(255, 165, 0), sf::Color(129, 11, 233), sf::Color(255, 165, 0), sf::Color(128, 0, 128)
     };
     int count = 0;
+
+    bool isLeftClicked = false;
+    sf::Color leftClickColor = sf::Color::Black;
 
     while (simWin1.isOpen() || configWin1.isOpen()) 
     {
@@ -91,6 +94,35 @@ int main()
             if (event.type == sf::Event::Closed || event.key.code == sf::Keyboard::Escape) {
                 simWin1.close();
                 break;
+            }
+
+            if(event.type == sf::Event::MouseButtonPressed and event.mouseButton.button == sf::Mouse::Left) {
+                isLeftClicked = true;
+            }
+
+            if(event.type == sf::Event::MouseButtonReleased and event.mouseButton.button == sf::Mouse::Left) {
+                isLeftClicked = false;
+            }
+
+            if (isLeftClicked) {
+                sf::Vector2f mousePos = simWin1.mapPixelToCoords(sf::Mouse::getPosition(simWin1));
+                for (const auto& ball : simWin1.nonStaticObjects) {
+                    if (ball->getGlobalBounds().contains(mousePos) && ball->getFillColor() != leftClickColor) {
+                        auto it = std::find(simWin1.nonStaticObjects.begin(), simWin1.nonStaticObjects.end(), ball);
+                        if (it != simWin1.nonStaticObjects.end()) {
+                            int index = std::distance(simWin1.nonStaticObjects.begin(), it);
+                            std::cout << "Ball index: " << index << std::endl;
+                        }
+                        ball->setFillColor(leftClickColor);
+                        break;
+                    }
+                }
+            }
+            if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right) {
+                sf::Vector2f mousePos = simWin1.mapPixelToCoords(sf::Mouse::getPosition(simWin1));
+                Ball tinyBall(radius, 30, mousePos, 1, colors[count % numColors], sf::Color::White);
+                simWin1.add_non_static_object(std::make_shared<Ball>(tinyBall));
+                count++;
             }
 
         }
@@ -186,6 +218,7 @@ int main()
             
         }
 
+
         if (acc2 >= 0.01 and count < 500) {
             float angle = count * (M_PI / 4); // Rotate by 45 degrees for each ball
             float xPos = 400 + 100 * std::cos(angle); 
@@ -196,19 +229,6 @@ int main()
             simWin1.apply_acceleration(sf::Vector2f(100000 * std::cos(angle), 100000 * 2), simWin1.nonStaticObjects.size() - 1);
             acc2 = 0;
             count++;
-        }
-
-        // Check for mouse hover over balls
-        sf::Vector2i mousePos = sf::Mouse::getPosition(simWin1);
-        for (const auto& ball : simWin1.nonStaticObjects) {
-            if (ball->getGlobalBounds().contains(simWin1.mapPixelToCoords(mousePos))) {
-                auto it = std::find(simWin1.nonStaticObjects.begin(), simWin1.nonStaticObjects.end(), ball);
-                if (it != simWin1.nonStaticObjects.end()) {
-                    int index = std::distance(simWin1.nonStaticObjects.begin(), it);
-                    std::cout << "Ball index: " << index << std::endl;
-                }
-                break;
-            }
         }
 
         float dt = 0.016;//clock.restart().asSeconds();
