@@ -8,7 +8,7 @@ class windowConfig : public sf::RenderWindow
 {
     private:
     public:
-        /////////PUBLIC_VARIABLES/////////
+        //****PUBLIC_VARIABLES****//
         std::vector<std::shared_ptr<sf::Text>> textInputFields;
         std::vector<std::vector<bool>> textInputConfig; // [0] = isCentered, [1] = isActive
         std::vector<std::shared_ptr<sf::Shape>> textBoundingBoxes;
@@ -16,15 +16,15 @@ class windowConfig : public sf::RenderWindow
         bool isFocused = false;
         sf::Color backgroundColor;
 
-        /////////CONSTRUCTOR/////////
+        //****CONSTRUCTOR****//
         windowConfig(const sf::VideoMode &videoMode, const sf::String &title, sf::Uint32 style, 
                 const sf::ContextSettings &settings, const float posRatioX, const float posRatioY, 
                 bool resizable, bool isFocused, int frameRate, sf::Color backgroundColor);
         
-        /////////DESTRUCTOR/////////
+        //****DESTRUCTOR****//
         ~windowConfig();
 
-        /////////FUNCTIONS/////////
+        //****FUNCTIONS****//
         void draw(const sf::Drawable &drawable, const sf::RenderStates &states);
         void update_visuals();
         void add_text_input_field(std::shared_ptr<sf::Text> text, float width, float height, bool centered, unsigned int attachedObject);

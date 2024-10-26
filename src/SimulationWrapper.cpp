@@ -9,13 +9,16 @@
 #include "../include/ConfigurationWindow.hpp"
 #include "../include/SimulationWindow.hpp"
 
-// Saves the indices of the balls that have been colored by left clicking
+// * Saves the indices of the balls that have been colored by left clicking
 void saveToFile(std::string filename, std::vector<int> ballIndicesColored);
-// Loads the indices of the balls
+
+// * Loads the indices of the balls
 void loadFromFile(std::string filename, std::vector<int>& ballIndicesColored);
-// Compiles the inputs from the command line
+
+// * Compiles the inputs from the command line
 bool compileInputs(std::string& output_file, std::string& input_file, int& color, int& pcolor, int argc, char** argv);
-// Returns sf color object based on the input color
+
+// * Returns sf color object based on the input color
 sf::Color getColor(int color);
 
 int main(int argc, char** argv)
@@ -28,7 +31,7 @@ int main(int argc, char** argv)
     if (argc > 10) {
         std::cerr << "Usage: -output <output_file> -input <input_file> -color <color> -pcolor <color>\n";
         std::cerr << "Colors: -1 = random, 0 = black, 1 = white, 2 = red, 3 = green, 4 = blue, 5 = yellow, 6 = magenta, 7 = cyan, 8 = orange, 9 = purple\n";
-        // std::cout << argc << std::endl;
+        //// std::cout << argc << std::endl;
         return -1;
     }
 
@@ -53,7 +56,7 @@ int main(int argc, char** argv)
     windowConfig configWin1(sf::VideoMode(300, 600), "Configuration", sf::Style::Close, sf::ContextSettings(), 0.6, 0.25, true, false, 60, sf::Color::Black);
 
     // Sim Window config:
-    /*
+    /* 
     Ball ball(50.f, 30, sf::Vector2f(500, 95), 1, sf::Color::Blue, sf::Color::White);
     Ball ball2(50.f, 30, sf::Vector2f(150, 300), 1, sf::Color::Red, sf::Color::White);
     Ball ball3(50.f, 30, sf::Vector2f(200, 50), 1, sf::Color::Green, sf::Color::White);
@@ -79,7 +82,7 @@ int main(int argc, char** argv)
     configWin1.add_text_input_field(std::make_shared<sf::Text>(playerText), 100, 8, true, 0);
 
 
-    // Main loop
+    // * Main loop
 
     sf::Clock clock;
     float accumulator = 0.f;
@@ -146,7 +149,7 @@ int main(int argc, char** argv)
                         auto it = std::find(simWin1.nonStaticObjects.begin(), simWin1.nonStaticObjects.end(), ball);
                         if (it != simWin1.nonStaticObjects.end()) {
                             int index = std::distance(simWin1.nonStaticObjects.begin(), it);
-                            // std::cout << "Ball index: " << index << std::endl;
+                            //// std::cout << "Ball index: " << index << std::endl;
                             ballIndicesColored.push_back(index);
                         }
                         ball->setFillColor(leftClickColor);
@@ -222,13 +225,13 @@ int main(int argc, char** argv)
                     float playerInputValue = 0;
                     try {
                         playerInputValue = std::stof(playerInput.toAnsiString());
-                        //std::cout << "Player input as float: " << playerInputValue << std::endl;
+                        ////std::cout << "Player input as float: " << playerInputValue << std::endl;
                     } catch (const std::invalid_argument& e) {
                         continue;
                     } catch (const std::out_of_range& e) {
                         continue;
                     }
-                    //std::cout << window2.getTextInputFields()[0]->getString().toAnsiString() << std::endl;
+                    ////std::cout << window2.getTextInputFields()[0]->getString().toAnsiString() << std::endl;
 
                     if (playerInputValue > 100) {
                         playerInputValue = 100;
@@ -240,7 +243,7 @@ int main(int argc, char** argv)
                     if (playerInputValue != 0) {
                         
                         // TODO: Attach inputs to certain objects/constants
-                        //continue;
+                        ////continue;
                         int activeAttachedObjectIndex = configWin1.get_active_attached_object_index();
                         if (activeAttachedObjectIndex == 0) {
                             simWin1.gravity = sf::Vector2f(0, playerInputValue);
@@ -261,21 +264,21 @@ int main(int argc, char** argv)
         if (acc2 >= 0.01 and count < 500) {
             float angle = count * (M_PI / 4); // Rotate by 45 degrees for each ball
             float xPos = 400 + 100 * std::cos(angle); 
-            //float yPos = 300 + 100 * std::sin(angle);
+            ////float yPos = 300 + 100 * std::sin(angle);
             Ball tinyBall(radius, 30, sf::Vector2f(xPos, 56), 1, colors[count % numColors], sf::Color::White);
             if ( std::find(ballIndicesColored.begin(), ballIndicesColored.end(), count) != ballIndicesColored.end()) {
                 tinyBall.setFillColor(leftClickColor);
             } else if(color != -1) {
                 tinyBall.setFillColor(getColor(color));
             }
-            //tinyBall.accelerate(sf::Vector2f(100 * std::cos(angle), 100 * std::sin(angle))); // Shoot out in rotating directions
+            ////tinyBall.accelerate(sf::Vector2f(100 * std::cos(angle), 100 * std::sin(angle))); // Shoot out in rotating directions
             simWin1.add_non_static_object(std::make_shared<Ball>(tinyBall));
             simWin1.apply_acceleration(sf::Vector2f(100000 * std::cos(angle), 100000 * 2), simWin1.nonStaticObjects.size() - 1);
             acc2 = 0;
             count++;
         }
 
-        float dt = 0.016;//clock.restart().asSeconds();
+        float dt = 0.016;////clock.restart().asSeconds();
         accumulator += dt;
         acc2 += dt;
         float sub_dt = 0;
@@ -333,7 +336,7 @@ void loadFromFile(std::string filename, std::vector<int>& ballIndicesColored) {
         std::stringstream ss(line);
         std::string token;
         while (std::getline(ss, token, ',')) {
-            // std::cout << "Token: " << token << std::endl;
+            //// std::cout << "Token: " << token << std::endl;
             ballIndicesColored.push_back(std::stoi(token));
         }
         inFile.close();

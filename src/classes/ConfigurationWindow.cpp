@@ -4,7 +4,7 @@
 #include "../../include/ConfigurationWindow.hpp"
 
 
-/////////CONSTRUCTOR/////////
+//****CONSTRUCTOR****//
 windowConfig::windowConfig(const sf::VideoMode &videoMode, const sf::String &title, sf::Uint32 style, 
                 const sf::ContextSettings &settings, const float posRatioX, const float posRatioY, 
                 bool resizable, bool isFocused, int frameRate, sf::Color backgroundColor = sf::Color::Black) 
@@ -17,7 +17,7 @@ windowConfig::windowConfig(const sf::VideoMode &videoMode, const sf::String &tit
         this->requestFocus();
     this->isFocused = isFocused;
 
-    //this->setVerticalSyncEnabled(resizable);
+    ////this->setVerticalSyncEnabled(resizable);
 
     // Set the window position
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
@@ -29,13 +29,13 @@ windowConfig::windowConfig(const sf::VideoMode &videoMode, const sf::String &tit
 
 }
 
-/////////DESTRUCTOR/////////
+//****/DESTRUCTOR****//
 windowConfig::~windowConfig() 
 {
     //delete this;
 }
 
-/////////FUNCTIONS/////////
+//****FUNCTIONS****//
 void windowConfig::draw(const sf::Drawable &drawable, const sf::RenderStates &states = sf::RenderStates::Default)
 {
     this->sf::RenderWindow::draw(drawable, states);

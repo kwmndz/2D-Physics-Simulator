@@ -5,7 +5,7 @@
 #include "../../include/CollisionShapes.hpp"
 #include <iostream>
 
-/////////PRIVATE_FUNCTIONS/////////
+//****PRIVATE_FUNCTIONS****//
 void windowSimulation::applyGravity()
 {
     for (int i = 0; i < static_cast<int>(nonStaticObjects.size()); i++) {
@@ -28,15 +28,15 @@ void windowSimulation::applyCircularConstraint()
         float distance = sqrt(direction.x * direction.x + direction.y * direction.y);
 
         if (distance > radius - shape->getRadius()) {
-            //std::cout << "Position-1:" << shape->position_old.x << ", " << shape->position_old.y << std::endl;
-            //std::cout << "Position0: " << shape->position_current.x << ", " << shape->position_current.y << std::endl;
+            ////std::cout << "Position-1:" << shape->position_old.x << ", " << shape->position_old.y << std::endl;
+            ////std::cout << "Position0: " << shape->position_current.x << ", " << shape->position_current.y << std::endl;
 
             sf::Vector2f v = shape->position_current - shape->position_old;
 
             sf::Vector2f n = direction / distance;
             shape->setPositionCurrent(center + n * (radius - shape->getRadius()) * 1.f);
 
-            //std::cout << "Position1: " << shape->position_current.x << ", " << shape->position_current.y << std::endl;
+            ////std::cout << "Position1: " << shape->position_current.x << ", " << shape->position_current.y << std::endl;
 
             // Bounce
 
@@ -53,7 +53,7 @@ void windowSimulation::applyCircularConstraint()
             Position2: 400, 591.998
             Position2: 400, 591.998
             */
-            //std::cout << "Position2: " << shape->position_old.x << ", " << shape->position_old.y << std::endl;
+            ////std::cout << "Position2: " << shape->position_old.x << ", " << shape->position_old.y << std::endl;
         }
     }
 }
@@ -109,7 +109,7 @@ void windowSimulation::applyCollision()
     }
 }
 
-/////////CONSTRUCTOR/////////
+//****CONSTRUCTOR****//
 windowSimulation::windowSimulation(const sf::VideoMode &videoMode, const sf::String &title, sf::Uint32 style, 
                 const sf::ContextSettings &settings, const float posRatioX, const float posRatioY, 
                 bool resizable, bool isFocused, int frameRate, std::shared_ptr<sf::Shape> constraint = nullptr, sf::Color backgroundColor = sf::Color::Black) 
@@ -122,7 +122,7 @@ windowSimulation::windowSimulation(const sf::VideoMode &videoMode, const sf::Str
         this->requestFocus();
     this->isFocused = isFocused;
 
-    //this->setVerticalSyncEnabled(resizable);
+    ////this->setVerticalSyncEnabled(resizable);
 
     // Constraint for the objects
     if (constraint != nullptr) {
@@ -132,7 +132,7 @@ windowSimulation::windowSimulation(const sf::VideoMode &videoMode, const sf::Str
         sf::RectangleShape rectangularArea(sf::Vector2f(this->getSize().x, this->getSize().y));
         rectangularArea.setFillColor(sf::Color::White);
         rectangularArea.setOrigin(this->getSize().x / 2.0f, this->getSize().y / 2.0f);
-        //shapes.push_back(std::make_shared<sf::RectangleShape>(rectangularArea));
+        ////shapes.push_back(std::make_shared<sf::RectangleShape>(rectangularArea));
         this->ConstraintShape = std::make_shared<sf::RectangleShape>(rectangularArea);
     }
 
@@ -145,13 +145,13 @@ windowSimulation::windowSimulation(const sf::VideoMode &videoMode, const sf::Str
     this->backgroundColor = backgroundColor;
 }
 
-/////////DESTRUCTOR/////////
+//****DESTRUCTOR****//
 windowSimulation::~windowSimulation() 
 {
     //delete this;
 }
 
-/////////FUNCTIONS/////////
+//****FUNCTIONS****//
 void windowSimulation::draw(const sf::Drawable &drawable, const sf::RenderStates &states = sf::RenderStates::Default)
 {
     this->sf::RenderWindow::draw(drawable, states);
@@ -178,11 +178,11 @@ void windowSimulation::update_positions(float dt)
     for (int i = 0; i < static_cast<int>(nonStaticObjects.size()); i++) {
         auto shape = std::dynamic_pointer_cast<Ball>(nonStaticObjects[i]);
         shape->updatePos(dt);
-        // std::cout << "Position: " << shape->getPosition().x << ", " << shape->getPosition().y << std::endl;
+        //// std::cout << "Position: " << shape->getPosition().x << ", " << shape->getPosition().y << std::endl;
     }
 }
 
-// Returns the index of the shape in the shapes vector, so you can attach it to a input object
+// * Returns the index of the shape in the shapes vector, so you can attach it to a input object
 unsigned int windowSimulation::add_shape(std::shared_ptr<sf::Shape> shape)
 {
     shapes.push_back(shape);
